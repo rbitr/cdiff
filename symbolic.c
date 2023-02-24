@@ -39,6 +39,10 @@ Expression * bop(Expression *x, Expression *y, char op) {
 
 }
 
+int is_zero(Expression * x) {
+  return x->op == '@' && x->value==0; // needs to be factored out
+}
+
 Expression * add(Expression *x, Expression *y) {
   if (x->op == '@' && x->value==0) {return copy(y);}
   if (y->op == '@' && y->value==0) {return copy(x);}
@@ -118,8 +122,12 @@ Expression* derive(Expression *e, char v) {
                mul(e->rv,e->rv));
   }
   else if (e->op == '^') {
-    if (e->rv->op == '@') {
-      ret = mul(mul(e->rv,powx(e->lv,wrap_float(e->rv->value - 1))),
+    //if (e->rv->op == '@') {
+    // see if the d(exponent)/dv == 0
+    Expression * de = derive(e->rv,'v');
+    // 
+    if (is_zero(de)) { // need to be modified to deal with exponent expression == 0 
+      ret = mul(mul(e->rv,powx(e->lv,add(e->rv, wrap_float(- 1)))),
                 derive(e->lv,v));
     }
     else {
@@ -139,10 +147,10 @@ Expression* derive(Expression *e, char v) {
 }
 
 int is_leaf(Expression * e) {
-  return (e->lv->op=='@' || is_lc_char(e->lv->op));
+  return (e->op=='@' || is_lc_char(e->op));
 }
 
-void print(Expression *e,int d) {
+void _print(Expression *e) {
  //if (d>5) return;
   if (e->op == '@') {
     printf("%.1f ", e->value);
@@ -154,25 +162,30 @@ void print(Expression *e,int d) {
     return;
   }
 
-  int lvx = !is_leaf(e);
-  int rvx = !is_leaf(e);
+  int lvx = !is_leaf(e->lv);
+  int rvx = !is_leaf(e->rv);
 
   if (lvx) printf("( ");
-  print(e->lv,d+1);
+  _print(e->lv);
   if (lvx) printf(") ");
 
   printf("%c ", e->op);
 
   if (rvx) printf("( ");
-  print(e->rv,d+1);
+  _print(e->rv);
   if (rvx) printf(") ");
 
  
 }
 
+void print(Expression * e) {
+  _print(e); printf("\n");
+}
+
 
 int main () {
 
+printf("Tests: \n");
 
 Expression *a = wrap_float(10);
 Expression *b = wrap_float(20);
@@ -180,42 +193,71 @@ Expression *c = wrap_float(30);
 
 Expression *t = wrap_var('x');
 
-Expression *q = add(a,b);
+Expression *q = add(a,b); // 10 + 20
 
-Expression *d = add(t,q);
+print(q);
 
-//printf("%c\n", c.op);
-//printf("%c\n", q.op);
-//printf("%c\n", a.op);
+Expression *d = add(t,q); // x + 10 + 20
 
-print(d,0);
-printf("\n");
-print(derive(d,'x'),0);
-printf("\n");
+print(d);
+
+print(derive(d,'x')); // 1
 
 Expression * lexp = add(add(mul(wrap_var('x'),wrap_var('x')),
                mul(wrap_float(2),wrap_var('x'))),
-           wrap_float(1));
+           wrap_float(1)); //x^2 + 2x + 1
 
-print(lexp, 0); printf("\n");
-print(derive(lexp,'x'), 0); printf ("\n");
+print(lexp); 
+print(derive(lexp,'x')); // 2x + 2
+
+Expression * mm = divx( wrap_var('y'), add(wrap_var('x'), wrap_float(1)));
+
+print(mm);
+print(derive(mm,'x'));
+print(derive(mm,'y'));
+
+Expression *nn = divx( powx( add (wrap_var('x'), wrap_float(1)), wrap_float(2)),
+                       powx( sub (wrap_var('x'), wrap_float(1)), wrap_float(2))
+                     );
+
+print(nn);
+print(derive(nn,'x'));
+print(derive(nn,'y'));
+
+Expression * x = wrap_var('x');
+Expression * y = wrap_var('y');
+Expression * _1 = wrap_float(1);
+Expression * _2 = wrap_float(2);
+
+Expression *oo = powx( add (powx(x,_2), _1), add(y,_1));
+
+print(oo);
+printf("%d\n",is_leaf(_1));
+
+print(derive(oo, 'x'));
+
+// fails to recognize exponent == 0
+Expression *ss = powx(x,_2);
+print(derive(ss,'x'));
+print(derive(derive(ss, 'x'), 'x'));
+print(derive(derive(derive(ss,'x'), 'x'), 'x'));
+
+exit(0);
 
 //Expression * pp = divx(wrap_var('x'),powx(add(wrap_var('x'),wrap_float(3)),wrap_float(2)));
 
 Expression * pp = divx(wrap_var('x'), powx(add(powx(wrap_var('x'),wrap_float(2)), wrap_float(1)), wrap_float(2)));
 
-print(pp,0); printf("\n");
-print(derive(pp,'x'),0); printf("\n");
+print(pp); printf("\n");
+print(derive(pp,'x')); printf("\n");
 
 Expression * qq = divx(wrap_var('y'), powx(add(powx(wrap_var('x'),wrap_float(2)), wrap_float(1)), wrap_float(2)));
 
-print(qq,0); printf("\n");
-print(derive(qq,'x'),0); printf("\n");
-print(derive(derive(qq,'x'),'y'),0); printf("\n");
+
+print(qq); printf("\n");
+print(derive(qq,'x')); printf("\n");
+print(derive(derive(qq,'x'),'y')); printf("\n");
 
 
-//for (char c='A';c<='z';c++) {
-//printf("%c %s a lowercase char\n", c, is_lc_char(c)?"is":"isn't");
-//}
 
 }
