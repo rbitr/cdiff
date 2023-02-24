@@ -1,33 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
-//#include <malloc.h>
 
 
 typedef struct Expression Expression;
 
 struct Expression {
- Expression* lv;
- Expression* rv;
- float value;
- char op;
+  Expression* lv;
+  Expression* rv;
+  float value;
+  char op;
 }; 
 
 Expression * wrap_float(float x);
 
-float myfunc(float x, float y) {
- 
- return 1 + x*y;
-
+int is_lc_char(char c) {
+  return (c >= 'a' && c <= 'z');
 }
 
-//Expression copy(Expression *x) {
-// Expression c;
-// c.lv = x->lv;
-// c.
-//}
-
 Expression * new_expression() {
- return malloc(sizeof(Expression));
+  return malloc(sizeof(Expression));
 }
 
 Expression * copy(Expression *x) {
@@ -61,19 +52,16 @@ Expression * mul(Expression *x, Expression *y) {
   if (x->op == '@' && x->value==1) {return copy(y);}
   if (y->op == '@' && y->value==1) {return copy(x);}
 
-
   return bop(x,y,'*'); 
 }
 
-// maybe just add * -1
 Expression * sub(Expression *x, Expression *y) {
-  return add(x,mul(wrap_float(-1),y));//bop(x,y,'-');
+  return add(x,mul(wrap_float(-1),y));
 }
 
 Expression * divx(Expression *x, Expression *y) {
   if (x->op == '@' && x->value==0) {return wrap_float(0);}
   if (y->op == '@' && y->value==0) {printf("Divide by 0\n"); exit(-1);}
-  //if (x->op == '@' && x->value==1) {return y;}
   if (y->op == '@' && y->value==1) {return copy(x);}
   return bop(x,y,'/');
 }
@@ -87,17 +75,17 @@ Expression * powx(Expression *x, Expression *y){
 
 Expression * wrap_float(float x) {
 
- Expression * ret = new_expression();
- ret->value = x;
- ret->op = '@';
- return ret;
+  Expression * ret = new_expression();
+  ret->value = x;
+  ret->op = '@';
+  return ret;
 }
 
 Expression * wrap_var(char x) {
 
- Expression * ret = new_expression();
- ret->op = x;
- return ret;
+  Expression * ret = new_expression();
+  ret->op = x;
+  return ret;
 
 }
 
@@ -113,6 +101,10 @@ Expression* derive(Expression *e, char v) {
     ret->op = '@';
     ret->value = 1;
   }
+  else if (is_lc_char(e->op)) { // any variable other than wrt differentiation
+    ret->op = '@';
+    ret->value = 0;
+  } 
   else if (e->op == '+') {
     ret = add(derive(e->lv,v),derive(e->rv,v));
   }
@@ -146,42 +138,41 @@ Expression* derive(Expression *e, char v) {
 
 }
 
-
+int is_leaf(Expression * e) {
+  return (e->lv->op=='@' || is_lc_char(e->lv->op));
+}
 
 void print(Expression *e,int d) {
  //if (d>5) return;
- //printf("%d\n", d);
- if (e->op == '@') {
-  printf("%.1f ", e->value);
-  return;
- }
+  if (e->op == '@') {
+    printf("%.1f ", e->value);
+    return;
+  }
 
- if (e->op == 'x') {
+  if (is_lc_char(e->op)) {
+    printf("%c ", e->op);
+    return;
+  }
+
+  int lvx = !is_leaf(e);
+  int rvx = !is_leaf(e);
+
+  if (lvx) printf("( ");
+  print(e->lv,d+1);
+  if (lvx) printf(") ");
+
   printf("%c ", e->op);
-  return;
- }
 
-int lvx = !(e->lv->op=='@' || e->lv->op=='x');
-int rvx = !(e->rv->op=='@' || e->rv->op=='x');
-
-if (lvx) printf("( ");
-print(e->lv,d+1);
-if (lvx) printf(") ");
-
-printf("%c ", e->op);
-
-if (rvx) printf("( ");
-print(e->rv,d+1);
-if (rvx) printf(") ");
+  if (rvx) printf("( ");
+  print(e->rv,d+1);
+  if (rvx) printf(") ");
 
  
-
 }
 
 
 int main () {
 
-printf("Hello World!\n");
 
 Expression *a = wrap_float(10);
 Expression *b = wrap_float(20);
@@ -215,5 +206,16 @@ Expression * pp = divx(wrap_var('x'), powx(add(powx(wrap_var('x'),wrap_float(2))
 
 print(pp,0); printf("\n");
 print(derive(pp,'x'),0); printf("\n");
+
+Expression * qq = divx(wrap_var('y'), powx(add(powx(wrap_var('x'),wrap_float(2)), wrap_float(1)), wrap_float(2)));
+
+print(qq,0); printf("\n");
+print(derive(qq,'x'),0); printf("\n");
+print(derive(derive(qq,'x'),'y'),0); printf("\n");
+
+
+//for (char c='A';c<='z';c++) {
+//printf("%c %s a lowercase char\n", c, is_lc_char(c)?"is":"isn't");
+//}
 
 }
