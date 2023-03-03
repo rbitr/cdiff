@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "matmul.h"
+#include "blas/matmul.h"
 
 
 void print_array(void * A, int rows, int cols, char f) {
@@ -99,7 +99,7 @@ int main(void)
     double b = 0;
 
     // READ IN SOME NUMBERS
-    fp = fopen("../data/rand_100_2.txt", "r");
+    fp = fopen("./data/rand_100_2.txt", "r");
     if (fp == NULL)
         exit(EXIT_FAILURE);
 
