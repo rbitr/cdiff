@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 
+#include "blas/layers.h"
 #include "blas/matmul.h"
 
 
@@ -38,6 +39,13 @@ res+=v[--l]; // hopefully that's right
 }
 return res;
 }
+
+
+//void dense( ) {
+//
+//
+//}
+
 
 double log_loss(double * preds, int * targs, int l) {
 double p;
@@ -96,7 +104,7 @@ int main(void)
     int * targets = malloc(data_rows*sizeof(int));
 
     double w[2] = {1, 1};
-    double b = 0;
+    double b[1] = {0};
 
     // READ IN SOME NUMBERS
     fp = fopen("./data/rand_100_2.txt", "r");
@@ -161,17 +169,22 @@ int main(void)
     int max_steps = 100;
     double alpha = 0.001;
 
+    // make a dense layer out of W and b
+    Dense * layer0 = dense(w, 2, b, 1);
+
+
     for (int step=0;step<max_steps;step++) {
 
 	// get the prediction
-        matrix_matrix_mul(inputs, 100, 2, w, 2, 1, y0);
+ 	layer0->apply(layer0, inputs, 100, 2, y0);
+   //   matrix_matrix_mul(inputs, 100, 2, w, 2, 1, y0);
 
         for (int i=0;i<100;i++) {
-   	 y0[i] += b;
+   //	 y0[i] += b;
     	y1[i] = sigmoid(y0[i]);
     	pred[i] = (int)(y1[i]+.5);
     	acc[i] = !(pred[i]^targets[i]);
-    }
+    } 
 
 	// get the loss
 
@@ -227,13 +240,13 @@ int main(void)
 	for (int c=0;c<data_cols;c++) {
 	w[c] -= alpha * dldw[c];
 	}
-	b -= alpha * dldb[0];
+	b[0] -= alpha * dldb[0];
 	
 	 for (int i=0;i<data_cols;i++) {
              printf("W%d: %f, ", i, w[i]);
         }
 
-        printf("bb: %f, ", b);
+        printf("bb: %f, ", b[0]);
  
 	printf("\n");
 

@@ -1,3 +1,4 @@
+#pragma once
 // basic matrix multiplication routines using blas
 #include "cblas.h"
 
