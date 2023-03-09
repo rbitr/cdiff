@@ -42,6 +42,23 @@ Dense * dense(double * W, int id, double * b, int od) {
 
 }
 
+void jac_dense(Dense * D, double * X, int m, int n, double * dx, double *Y) {
+// try this
+// it could also return a layer that acts as the jacobian?
+if (dx == X) {
+ return D->W;
+}
+else if (dx == D->W) {
+ return X; // need to transpose, let's see how it will work first
+}
+else if (dx == D->b) {
+ // identity matrix
+}  
+else {
+  // return zeros
+}
+}
+
 typedef struct Relu Relu; 
 
 struct Relu
