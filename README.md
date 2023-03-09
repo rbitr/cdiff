@@ -13,5 +13,7 @@ it compiles with clang with default arguments and I think should work anywhere
 clang ex2.c -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Headers/ -framework Accelerate -o ex2
 ``` 
 
+`blas/layers2.ipynb` is a python example of a first simple AD program to be ported to C
+
 more to come...
 
