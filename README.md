@@ -1,4 +1,4 @@
-# cdiff
+# Mileena
 Automatic differentiation experiments in C
 
 The goal is jax in C with no significant dependencies (probably BLAS). I have a roadmap in my head, though right now I'm just setting it up and thinking about how I'll do it.
