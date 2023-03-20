@@ -39,6 +39,28 @@ printf("%s\n", o);
 free(o);
 free(t);
 
+size_t s2[] = {4,5};
+size_t scalar[] = {1, -1};
+t = mil_zeros(s2);
+mil_tensor * t2 = malloc(sizeof(mil_tensor));
+
+t2 = mil_ones(scalar);
+
+mil_tensor * t3 = malloc(sizeof(mil_tensor));
+
+t3 = mil_zeros(s2);
+
+mil_add(t, t2, t3);
+mil_add(t2, t3, t);
+
+o = mil_tensor_tostring(t);
+
+printf("%s\n", o);
+
+free(o);
+free(t);
+free(t2);
+free(t3);
 
 return 0;
 }
