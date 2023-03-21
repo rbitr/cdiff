@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "blas/matmul.h"
 
 #define TRUE 1
 #define FALSE !TRUE
@@ -188,7 +189,30 @@ void mil_add(mil_tensor * a, mil_tensor *b, mil_tensor *result) {
 	}
 }
 
+void mil_matmul(mil_tensor *a, mil_tensor *b, mil_tensor *result) {
+	// for now assume a is [.., m,k] and b is [k,m]
+	// result is [.., m, n]
+	// matrix dims m, k are the last two of a
+ 	size_t a_end = mil_last_dim(a);
+	size_t b_end = mil_last_dim(b);
+	size_t r_end = mil_last_dim(result);
+	assert (a_end>=1);
+	assert( a->shape[a_end] == b->shape[b_end-1]);
+	assert( result->shape[r_end] == b->shape[b_end]);
+	assert( result->shape[r_end-1] == a->shape[a_end-1]);
+	
 
+	if (a_end==1) { // just a normal 2D
+		matrix_matrix_mul(a->data, a->shape[0], a->shape[1],
+			b->data, b->shape[0], b->shape[1], result->data);	
+		return;
+	}
+	else {
+		fprintf(stderr, "addition not implemented for shapes\n");
+                exit(-1);
+	}	
+
+}
 
 
 char * mil_tensor_tostring(mil_tensor * t) {

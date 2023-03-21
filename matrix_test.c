@@ -70,11 +70,21 @@ int main() {
 	double v[] = {3.3};
 	size_t vdims[] = {1,-1};
 
+	double m[] = {1,0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0};
+	size_t mdims[] = {3,4};
+
+	size_t rdims[] = {4,4};
+
 	print_with_line_after("Adding like shapes");
 	test_matrix_op(mil_add, x, y, xdims, ydims, xdims);	
 	
 	print_with_line_after("Broadcast addition");
 	test_matrix_op(mil_add, x, z, xdims, alt_zdims, xdims);
+
+	print_with_line_after("Matrix multiplication");
+	test_matrix_op(mil_matmul, x, m, xdims, mdims, rdims);
 
 	return 0;
 
